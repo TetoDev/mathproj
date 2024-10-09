@@ -62,6 +62,7 @@ def main ():
     r= 1 #random.random()*100
     h= 1 #random.random()*100
     l= -20 #random.random()*100
-    fixedStepGradientMethod(r,h,l)
+    fixedStepGradientMethod(r, h, l)
+    optimalStepGradientMethod(r, h, l)
 
 main()
