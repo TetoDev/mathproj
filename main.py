@@ -16,9 +16,9 @@ def fixedStepGradientMethod (r,h,l):
         dk = calc.gradientLagrangien(X_k[0], X_k[1], X_k[2])
         
         X_k = [
-            X_k[0] - 0.001 * dk[0],
-            X_k[1] - 0.001 * dk[1],
-            X_k[2] - 0.001 * dk[2]
+            X_k[0] - 0.0001 * dk[0],
+            X_k[1] - 0.0001 * dk[1],
+            X_k[2] - 0.0001 * dk[2]
             ]
         print (iterations,': ',dk)
         iterations += 1
@@ -32,22 +32,21 @@ def wolfeStep(X_k, dk):
 
     psk = calc.scalarProduct(dk,gradient)
 
-    c1 = 0.1
+    c1 = 0.01
     c2 = 0.99
 
     a_min = 0
     a_max = 100
-    a = (a_min + a_max)/2
-
-    tooBig = True
-    tooSmall = True
+    a =1.0E-06
+    condition1 = 0
+    condition2 = 0
     iterations = 1 
-    while ((tooSmall or tooBig) and (iterations < 100)):
+    while (((condition1 + condition2) < 2) and (iterations < 100)):
         
-        #print(iterations,'. a: ', a)
+        print(iterations,'. a: ', a)
 
 
-        X_k1 = [
+        X_k1[0] = [
             X_k[0] + a*dk[0],
             X_k[1] + a*dk[1],
             X_k[2] + a*dk[2],
@@ -59,24 +58,30 @@ def wolfeStep(X_k, dk):
 
         iterations += 1
 
-        print(lagrange_X_k1, ' > ', lagrange + c1*a*psk)
+        #print(lagrange_X_k1, ' > ', lagrange + c1*a*psk)
         if (lagrange_X_k1 > (lagrange + c1*a*psk)):
-            tooBig = True
+            condition1 = 0
 
             a_max = a
 
             a= (a_min + a_max)/2
         else:
-            tooBig = False
+            condition1 = 1
 
+        #print(-psk1 , ' > ', -c2*psk)
         if (-psk1 > -c2*psk) :
-            tooSmall = True
+            condition2 = 0
             
-            a_min = a
+            if a_max < 100:
+                a_min = a
 
-            a= (a_min+a_max)/2
+                a = (a_min+a_max)/2
+            else :
+                a = 2*a
         else :
-            tooSmall = False
+            condition2 = 1
+        
+        print(condition1, condition2)
 
     
     return a
@@ -93,18 +98,21 @@ def optimalStepGradientMethod(r,h,l):
     while (calc.norm(dk) > 0.5 and iterations < 100):
 
         dk = calc.gradientLagrangien(X_k[0], X_k[1], X_k[2])
+        for i in range(len(dk)):
+            dk[i] = -dk[i]
+
         alpha = wolfeStep(X_k,dk)
         print('OptimalStep a: ', alpha)
         
         
         X_k = [
-            X_k[0] - alpha * dk[0],
-            X_k[1] - alpha * dk[1],
-            X_k[2] - alpha * dk[2]
+            X_k[0] + alpha * dk[0],
+            X_k[1] + alpha * dk[1],
+            X_k[2] + alpha * dk[2]
             ]
-        print (iterations,': ',dk)
+
+        print (iterations,' Lagrangien: ', calc.lagrangien(X_k[0], X_k[1], X_k[2]))
         iterations += 1
-    print(iterations)
 
 def newtonMethod(r, h, l):
     pass

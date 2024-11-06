@@ -1,7 +1,7 @@
 import math
 
 # Volume contrainte minimale
-V0 = 10
+V0 = 1
 
 def lagrangien(r, h, l):
     return (math.pi**2) * (r**2) * ((r**2) + (h**2)) + l*((math.pi/3)* (r**2) * h - V0)
