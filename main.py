@@ -27,7 +27,7 @@ def fixedStepGradientMethod (r,h,l):
 
 def wolfeStep(X_k, dk):
 
-    lagrange = calc.lagrangien(X_k[0],X_k[1],X_k[1]) # X_k
+    lagrange = calc.lagrangien(X_k[0],X_k[1],X_k[2]) # X_k
     gradient = calc.gradientLagrangien(X_k[0],X_k[1],X_k[2]) # X_k
 
     psk = calc.scalarProduct(dk,gradient)
@@ -42,11 +42,8 @@ def wolfeStep(X_k, dk):
     condition2 = 0
     iterations = 1 
     while (((condition1 + condition2) < 2) and (iterations < 100)):
-        
-        print(iterations,'. a: ', a)
 
-
-        X_k1[0] = [
+        X_k1 = [
             X_k[0] + a*dk[0],
             X_k[1] + a*dk[1],
             X_k[2] + a*dk[2],
@@ -58,7 +55,6 @@ def wolfeStep(X_k, dk):
 
         iterations += 1
 
-        #print(lagrange_X_k1, ' > ', lagrange + c1*a*psk)
         if (lagrange_X_k1 > (lagrange + c1*a*psk)):
             condition1 = 0
 
@@ -80,10 +76,7 @@ def wolfeStep(X_k, dk):
                 a = 2*a
         else :
             condition2 = 1
-        
-        print(condition1, condition2)
 
-    
     return a
         
 
@@ -151,9 +144,9 @@ def quasiNewtonMethod(r, h, l):
 
 
 def main ():
-    r= 1 #random.random()*100
-    h= 1 #random.random()*100
-    l= -20 #random.random()*100
+    r= random.random()*100
+    h= random.random()*100
+    l= random.random()*100
     #fixedStepGradientMethod(r, h, l)
     optimalStepGradientMethod(r, h, l)
     #quasiNewtonMethod(r, h, l)
