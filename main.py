@@ -20,9 +20,9 @@ def fixedStepGradientMethod (r,h,l):
             X_k[1] - 0.0001 * dk[1],
             X_k[2] - 0.0001 * dk[2]
             ]
-        print (iterations,': ',calc.lagrangien(X_k[0], X_k[1], X_k[2]))
+        print(iterations, ' | Lagrangien: ', calc.lagrangien(X_k[0], X_k[1], X_k[2]))
         iterations += 1
-    print(iterations)
+    return X_k
 
 
 def wolfeStep(X_k, dk):
@@ -104,13 +104,11 @@ def optimalStepGradientMethod(r,h,l):
             X_k[2] + alpha * dk[2]
             ]
 
-        print (iterations,' Lagrangien: ', calc.lagrangien(X_k[0], X_k[1], X_k[2]))
+        print(iterations, ' | Lagrangien: ', calc.lagrangien(X_k[0], X_k[1], X_k[2]))
         iterations += 1
+    return X_k
 
 def newtonMethod(r, h, l):
-    pass
-
-def quasiNewtonMethod(r, h, l):
     X_k = [r, h, l]
     dk = [10, 10, 10]
     iterations = 1
@@ -122,7 +120,6 @@ def quasiNewtonMethod(r, h, l):
         hess_inv = calc.inverseMatrix(hess)
             
         dk = [
-            # I think this is wrong
             hess_inv[0][0] * grad[0] + hess_inv[0][1] * grad[1] + hess_inv[0][2] * grad[2],
             hess_inv[1][0] * grad[0] + hess_inv[1][1] * grad[1] + hess_inv[1][2] * grad[2],
             hess_inv[2][0] * grad[0] + hess_inv[2][1] * grad[1] + hess_inv[2][2] * grad[2]
@@ -134,11 +131,30 @@ def quasiNewtonMethod(r, h, l):
             X_k[2] - dk[2]
         ]
             
-        print(iterations, ': ', dk, ' Lagrangien: ', calc.lagrangien(X_k[0], X_k[1], X_k[2]))
+        print(iterations, ' | Lagrangien: ', calc.lagrangien(X_k[0], X_k[1], X_k[2]))
         iterations += 1
     print(iterations)
+    return X_k
 
-
+def quasiNewtonMethod(r, h, l):
+    X_k = [r, h, l]
+    dk = [10, 10, 10]
+    iterations = 1
+    
+    while calc.norm(dk) > 0.5 and iterations < 10000:
+            
+        dk = []
+            
+        X_k = [
+            X_k[0] - dk[0],
+            X_k[1] - dk[1],
+            X_k[2] - dk[2]
+        ]
+            
+        print(iterations, ' | Lagrangien: ', calc.lagrangien(X_k[0], X_k[1], X_k[2]))
+        iterations += 1
+    print(iterations)
+    return X_k
     
 
 
@@ -147,8 +163,9 @@ def main ():
     r= 5#random.random()*100
     h= 1#random.random()*100
     l= -20#random.random()*100
-    # fixedStepGradientMethod(r, h, l)
-    # optimalStepGradientMethod(r, h, l)
-    quasiNewtonMethod(r, h, l)
-
+    #solution = fixedStepGradientMethod(r, h, l)
+    #solution = optimalStepGradientMethod(r, h, l)
+    solution = newtonMethod(r, h, l)
+    #solution = quasiNewtonMethod(r, h, l)
+    print(solution)
 main()
