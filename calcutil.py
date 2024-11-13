@@ -17,17 +17,17 @@ def gradientLagrangien(r, h ,l ):
 
 def hessianLagrangien(r, h, l):
     # Second partial derivative with respect to r
-    d2f_dr2 = 1
+    d2f_dr2 = (math.pi**2) * (12 * (r**2) + 2 * (h**2)) + l * (2 * math.pi * h / 3)
     # Second partial derivative with respect to h
-    d2f_dh2 = 1
+    d2f_dh2 = 2 * (math.pi**2) * (r**2)
     # Second partial derivative with respect to l (constant term)
-    d2f_dl2 = 1
+    d2f_dl2 = 0
     # Mixed partial derivative with respect to r and h
-    d2f_drh = 2
+    d2f_drh = 4 * h * (math.pi**2) + l * (2*math.pi * r / 3)
     # Mixed partial derivative with respect to r and l
-    d2f_drl = 2
+    d2f_drl = (2 * math.pi * r * h / 3)
     # Mixed partial derivative with respect to h and l
-    d2f_dhl = 5
+    d2f_dhl = (math.pi * r**2 / 3)
         
     return [
         [d2f_dr2, d2f_drh, d2f_drl],

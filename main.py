@@ -20,7 +20,7 @@ def fixedStepGradientMethod (r,h,l):
             X_k[1] - 0.0001 * dk[1],
             X_k[2] - 0.0001 * dk[2]
             ]
-        print (iterations,': ',dk)
+        print (iterations,': ',calc.lagrangien(X_k[0], X_k[1], X_k[2]))
         iterations += 1
     print(iterations)
 
@@ -88,7 +88,7 @@ def optimalStepGradientMethod(r,h,l):
 
     
     iterations = 1
-    while (calc.norm(dk) > 0.5 and iterations < 100):
+    while (calc.norm(dk) > 0.5 and iterations < 100000):
 
         dk = calc.gradientLagrangien(X_k[0], X_k[1], X_k[2])
         for i in range(len(dk)):
@@ -134,7 +134,7 @@ def quasiNewtonMethod(r, h, l):
             X_k[2] - dk[2]
         ]
             
-        print(iterations, ': ', dk)
+        print(iterations, ': ', dk, ' Lagrangien: ', calc.lagrangien(X_k[0], X_k[1], X_k[2]))
         iterations += 1
     print(iterations)
 
@@ -144,11 +144,11 @@ def quasiNewtonMethod(r, h, l):
 
 
 def main ():
-    r= random.random()*100
-    h= random.random()*100
-    l= random.random()*100
-    #fixedStepGradientMethod(r, h, l)
-    optimalStepGradientMethod(r, h, l)
-    #quasiNewtonMethod(r, h, l)
+    r= 5#random.random()*100
+    h= 1#random.random()*100
+    l= -20#random.random()*100
+    # fixedStepGradientMethod(r, h, l)
+    # optimalStepGradientMethod(r, h, l)
+    quasiNewtonMethod(r, h, l)
 
 main()
