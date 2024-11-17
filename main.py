@@ -148,7 +148,7 @@ def quasiNewtonMethod(r, h, l):
         while iterations < max_iterations:
             
             if calc.isPositiveDefinite(calc.hessianLagrangien(X_k[0], X_k[1], X_k[2])):
-                break
+                break # CONDITION TO SWITCH TO NEWTON'S METHOD
     
             grad = calc.gradientLagrangien(X_k[0], X_k[1], X_k[2])
 
