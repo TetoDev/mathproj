@@ -49,6 +49,14 @@ def inverseMatrix(matrix):
     return inverse
 
 def determinant(matrix):
+    # Base case for 1x1 matrix
+    if len(matrix) == 1:
+        return matrix[0][0]
+    
+    # Base case for 2x2 matrix
+    if len(matrix) == 2:
+        return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]
+    
     # Calculating the determinant of a 3x3 matrix
     return (matrix[0][0] * (matrix[1][1] * matrix[2][2] - matrix[1][2] * matrix[2][1]) -
             matrix[0][1] * (matrix[1][0] * matrix[2][2] - matrix[1][2] * matrix[2][0]) +
@@ -56,3 +64,27 @@ def determinant(matrix):
 
 def scalarProduct(v1,v2):
     return v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2]
+
+def isPositiveDefinite(matrix): # Not sure if this is the condition to say if a matrix is positive
+    for i in range(1, len(matrix) + 1): # This function never returns true for some reason, so the program never switches to newton's method
+        sub_matrix = [row[:i] for row in matrix[:i]]
+        if determinant(sub_matrix) <= 0:
+            return False
+    return True
+
+
+def multiplyMatrices(matrix1, matrix2):
+    result = [[0 for _ in range(3)] for _ in range(3)]
+    for i in range(3):
+        for j in range(3):
+            for k in range(3):
+                result[i][j] += matrix1[i][k] * matrix2[k][j]
+    return result
+
+def test (matrix): # Ylann's proposition, when used the program never uses the BFGS method in my testing
+    temp = multiplyMatrices(matrix, matrix)
+    for i in range(len(temp)):
+        for j in range(len(temp[i])):
+            if temp[i][j] < 0:
+                return False
+    return True
