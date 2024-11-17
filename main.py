@@ -146,8 +146,11 @@ def quasiNewtonMethod(r, h, l):
         H_k = [[1,0,0],[0,1,0],[0,0,1]]
     
         while iterations < max_iterations:
+
+            # Actual hessian of lagrange for current X_k
+            hessian = calc.hessianLagrangien(X_k[0], X_k[1], X_k[2])
             
-            if calc.isPositiveDefinite(calc.hessianLagrangien(X_k[0], X_k[1], X_k[2])):
+            if calc.isPositiveDefinite(calc.inverseMatrix(hessian)):
                 break # CONDITION TO SWITCH TO NEWTON'S METHOD
     
             grad = calc.gradientLagrangien(X_k[0], X_k[1], X_k[2])
