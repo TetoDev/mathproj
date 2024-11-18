@@ -1,9 +1,7 @@
-import math, random
+import random
 import calcutil as calc
 
-# Volume contrainte minimale
-V0 = 10
-
+usedBFGS = False
 
 def fixedStepGradientMethod (r,h,l):
 
@@ -64,7 +62,6 @@ def wolfeStep(X_k, dk):
         else:
             condition1 = 1
 
-        #print(-psk1 , ' > ', -c2*psk)
         if (-psk1 > -c2*psk) :
             condition2 = 0
             
@@ -113,7 +110,7 @@ def newtonMethod(r, h, l):
     dk = [10, 10, 10]
     iterations = 1
     
-    while calc.norm(dk) > 0.5 and iterations < 10000:
+    while calc.norm(dk) > 0.5 and iterations < 50:
 
         grad = calc.gradientLagrangien(X_k[0], X_k[1], X_k[2])
         hess = calc.hessianLagrangien(X_k[0], X_k[1], X_k[2])
@@ -137,6 +134,7 @@ def newtonMethod(r, h, l):
     return X_k
 
 def quasiNewtonMethod(r, h, l):
+        global usedBFGS
     # Initial guess
         X_k = [r, h, l]
         iterations = 0
@@ -148,19 +146,34 @@ def quasiNewtonMethod(r, h, l):
         while iterations < max_iterations:
 
             # Actual hessian of lagrange for current X_k
-            hessian = calc.hessianLagrangien(X_k[0], X_k[1], X_k[2])
-            
-            if calc.isPositiveDefinite(calc.inverseMatrix(hessian)):
-                break # CONDITION TO SWITCH TO NEWTON'S METHOD
+            hess_inv = calc.inverseMatrix(calc.hessianLagrangien(X_k[0], X_k[1], X_k[2]))
     
             grad = calc.gradientLagrangien(X_k[0], X_k[1], X_k[2])
 
             # Compute search direction
             dk = [-sum(H_k[i][j] * grad[j] for j in range(3)) for i in range(3)]
-    
-            alpha = wolfeStep(X_k,dk)
-    
-            # Update X_k
+
+            # Compute newton direction
+            newton_dk = [
+                hess_inv[0][0] * grad[0] + hess_inv[0][1] * grad[1] + hess_inv[0][2] * grad[2],
+                hess_inv[1][0] * grad[0] + hess_inv[1][1] * grad[1] + hess_inv[1][2] * grad[2],
+                hess_inv[2][0] * grad[0] + hess_inv[2][1] * grad[1] + hess_inv[2][2] * grad[2]
+            ]
+
+            # Check if newton direction is a descent direction
+            condition = calc.scalarProduct(newton_dk, grad) >= 0
+            if condition:
+                break
+            usedBFGS = True
+            
+            # Find alpha using Wolfe conditions, switch to newton if values are too big
+            try:
+                alpha = wolfeStep(X_k,dk)
+            except:
+                print('No alpha found')
+                break
+
+            # Set Xk+1
             X_k1 = [
                 X_k[0] + alpha*dk[0],
                 X_k[1] + alpha*dk[1],
@@ -183,8 +196,12 @@ def quasiNewtonMethod(r, h, l):
             ]
     
             # Update Hessian approximation using BFGS formula
-            rho_k = 1.0 / calc.scalarProduct(y_k, s_k)
-            I = [[1,0,0],[0,1,0],[0,0,1]]
+            estimation = calc.scalarProduct(s_k, y_k)
+            if estimation != 0:
+                rho_k = 1.0 / calc.scalarProduct(y_k, s_k)
+            else:
+                rho_k = 0
+
             V = [[1 - rho_k * s_k[i] * y_k[j] for j in range(3)] for i in range(3)]
             H_k = [[sum(V[i][k] * H_k[k][j] for k in range(3)) for j in range(3)] for i in range(3)]
             H_k = [[H_k[i][j] + rho_k * s_k[i] * s_k[j] for j in range(3)] for i in range(3)]
@@ -206,12 +223,24 @@ def quasiNewtonMethod(r, h, l):
 
 
 def main ():
-    r= random.random()*100
-    h= random.random()*100
-    l= random.random()*100
+    global usedBFGS
     #solution = fixedStepGradientMethod(r, h, l)
     #solution = optimalStepGradientMethod(r, h, l)
     # solution = newtonMethod(r, h, l)
-    solution = quasiNewtonMethod(r, h, l)
-    print(solution)
+    while not usedBFGS:
+        r= random.random()*100
+        h= random.random()*100
+        l= random.random()*100
+        print(r,h,l)
+        hessian = calc.hessianLagrangien(r,h,l)
+        print('Hessian')
+        for i in range(len(hessian)):
+            print(hessian[i])
+        print()
+        print('Inverse Hessian')
+        inverse = calc.inverseMatrix(hessian)
+        for i in range(len(inverse)):
+            print(inverse[i])
+        solution = quasiNewtonMethod(r, h, l)
+        print(solution)
 main()

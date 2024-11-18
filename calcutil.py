@@ -1,7 +1,7 @@
 import math
 
 # Volume contrainte minimale
-V0 = 1
+V0 = 10
 
 def lagrangien(r, h, l):
     return (math.pi**2) * (r**2) * ((r**2) + (h**2)) + l*((math.pi/3)* (r**2) * h - V0)
@@ -71,6 +71,7 @@ def isPositiveDefinite(matrix): # Not sure if this is the condition to say if a 
         if determinant(sub_matrix) <= 0:
             return False
     return True
+
 
 
 def multiplyMatrices(matrix1, matrix2):
