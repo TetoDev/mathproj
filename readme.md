@@ -21,3 +21,8 @@ Dépendances:
 
     - Random (Bibliothèque standard)
     - Math (Bibliiothèque standard)
+
+
+Exécution:
+
+Pour exécuter le code il faut avoir installé Python 3.11+ et utiliser la commande "python main.py" dans le directeur racine du projet.

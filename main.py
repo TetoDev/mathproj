@@ -3,26 +3,31 @@ import calcutil as calc
 
 usedBFGS = False
 
+# Méthode de gradient à pas fixe
 def fixedStepGradientMethod (r,h,l):
 
     X_k = [r,h,l]
 
+    # Initialisation arbitraire du vecteur direction
     dk = [10,10,10]
     iterations = 1
     while (calc.norm(dk) > 0.5 and iterations < 10000):
 
+        # Calcul du gradient de la fonction lagrangienne
         dk = calc.gradientLagrangien(X_k[0], X_k[1], X_k[2])
         
+        # Mise à jour de X_k, avec un pas fixe de 0.0001
         X_k = [
             X_k[0] - 0.0001 * dk[0],
             X_k[1] - 0.0001 * dk[1],
             X_k[2] - 0.0001 * dk[2]
             ]
-        print(iterations, ' | Lagrangien: ', calc.lagrangien(X_k[0], X_k[1], X_k[2]))
+        
+        print(iterations, ' | Pas fixe: Lagrangien: ', calc.lagrangien(X_k[0], X_k[1], X_k[2]))
         iterations += 1
     return X_k
 
-
+# Algorithme de Wolfe pour trouver un pas optimal pour un certain X_k et dk
 def wolfeStep(X_k, dk):
 
     lagrange = calc.lagrangien(X_k[0],X_k[1],X_k[2]) # X_k
@@ -36,6 +41,7 @@ def wolfeStep(X_k, dk):
     a_min = 0
     a_max = 100
     a =1.0E-06
+
     condition1 = 0
     condition2 = 0
     iterations = 1 
@@ -53,6 +59,8 @@ def wolfeStep(X_k, dk):
 
         iterations += 1
 
+        # Conditions de Wolfe
+        # Condition verifiant que le pas ne soit pas trop grand
         if (lagrange_X_k1 > (lagrange + c1*a*psk)):
             condition1 = 0
 
@@ -62,6 +70,7 @@ def wolfeStep(X_k, dk):
         else:
             condition1 = 1
 
+        # Condition verifiant que le pas ne soit pas trop petit
         if (-psk1 > -c2*psk) :
             condition2 = 0
             
@@ -76,11 +85,13 @@ def wolfeStep(X_k, dk):
 
     return a
         
-
+# Méthode de gradient à pas optimal, utilisant le Wolfe step
 def optimalStepGradientMethod(r,h,l):
 
     alpha = 0
     X_k = [r,h,l]
+
+    # Initialisation arbitraire du vecteur direction
     dk = [10,10,10]
 
     
@@ -91,10 +102,11 @@ def optimalStepGradientMethod(r,h,l):
         for i in range(len(dk)):
             dk[i] = -dk[i]
 
+        # Calcul du pas optimal avec la méthode de Wolfe
         alpha = wolfeStep(X_k,dk)
         print('OptimalStep a: ', alpha)
         
-        
+        # Mise à jour de X_k
         X_k = [
             X_k[0] + alpha * dk[0],
             X_k[1] + alpha * dk[1],
@@ -105,8 +117,11 @@ def optimalStepGradientMethod(r,h,l):
         iterations += 1
     return X_k
 
+# Méthode de Newton
 def newtonMethod(r, h, l):
     X_k = [r, h, l]
+
+    # Initialisation arbitraire du vecteur direction
     dk = [10, 10, 10]
     iterations = 1
     
@@ -115,7 +130,8 @@ def newtonMethod(r, h, l):
         grad = calc.gradientLagrangien(X_k[0], X_k[1], X_k[2])
         hess = calc.hessianLagrangien(X_k[0], X_k[1], X_k[2])
         hess_inv = calc.inverseMatrix(hess)
-            
+        
+        # Calcul de la direction de Newton
         dk = [
             hess_inv[0][0] * grad[0] + hess_inv[0][1] * grad[1] + hess_inv[0][2] * grad[2],
             hess_inv[1][0] * grad[0] + hess_inv[1][1] * grad[1] + hess_inv[1][2] * grad[2],
