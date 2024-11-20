@@ -1,8 +1,6 @@
 import random
 import calcutil as calc
 
-usedBFGS = False
-
 # Méthode de gradient à pas fixe
 def fixedStepGradientMethod (r,h,l):
 
@@ -23,67 +21,9 @@ def fixedStepGradientMethod (r,h,l):
             X_k[2] - 0.0001 * dk[2]
             ]
         
-        print(iterations, ' | Pas fixe: Lagrangien: ', calc.lagrangien(X_k[0], X_k[1], X_k[2]))
+        print(iterations, ' | Pas fixe Lagrangien: ', calc.lagrangien(X_k[0], X_k[1], X_k[2]))
         iterations += 1
     return X_k
-
-# Algorithme de Wolfe pour trouver un pas optimal pour un certain X_k et dk
-def wolfeStep(X_k, dk):
-
-    lagrange = calc.lagrangien(X_k[0],X_k[1],X_k[2]) # X_k
-    gradient = calc.gradientLagrangien(X_k[0],X_k[1],X_k[2]) # X_k
-
-    psk = calc.scalarProduct(dk,gradient)
-
-    c1 = 0.01
-    c2 = 0.99
-
-    a_min = 0
-    a_max = 100
-    a =1.0E-06
-
-    condition1 = 0
-    condition2 = 0
-    iterations = 1 
-    while (((condition1 + condition2) < 2) and (iterations < 100)):
-
-        X_k1 = [
-            X_k[0] + a*dk[0],
-            X_k[1] + a*dk[1],
-            X_k[2] + a*dk[2],
-        ]
-
-        lagrange_X_k1 = calc.lagrangien(X_k1[0],X_k1[1],X_k1[2]) # X_k1
-        gradient_X_k1 = calc.gradientLagrangien(X_k1[0],X_k1[1],X_k1[2]) # X_k1
-        psk1 = calc.scalarProduct(gradient_X_k1,dk)
-
-        iterations += 1
-
-        # Conditions de Wolfe
-        # Condition verifiant que le pas ne soit pas trop grand
-        if (lagrange_X_k1 > (lagrange + c1*a*psk)):
-            condition1 = 0
-
-            a_max = a
-
-            a= (a_min + a_max)/2
-        else:
-            condition1 = 1
-
-        # Condition verifiant que le pas ne soit pas trop petit
-        if (-psk1 > -c2*psk) :
-            condition2 = 0
-            
-            if a_max < 100:
-                a_min = a
-
-                a = (a_min+a_max)/2
-            else :
-                a = 2*a
-        else :
-            condition2 = 1
-
-    return a
         
 # Méthode de gradient à pas optimal, utilisant le Wolfe step
 def optimalStepGradientMethod(r,h,l):
@@ -96,14 +36,14 @@ def optimalStepGradientMethod(r,h,l):
 
     
     iterations = 1
-    while (calc.norm(dk) > 0.5 and iterations < 100000):
+    while (calc.norm(dk) > 0.8 and iterations < 100000):
 
         dk = calc.gradientLagrangien(X_k[0], X_k[1], X_k[2])
         for i in range(len(dk)):
             dk[i] = -dk[i]
 
         # Calcul du pas optimal avec la méthode de Wolfe
-        alpha = wolfeStep(X_k,dk)
+        alpha = calc.wolfeStep(X_k,dk)
         print('OptimalStep a: ', alpha)
         
         # Mise à jour de X_k
@@ -113,7 +53,7 @@ def optimalStepGradientMethod(r,h,l):
             X_k[2] + alpha * dk[2]
             ]
 
-        print(iterations, ' | Lagrangien: ', calc.lagrangien(X_k[0], X_k[1], X_k[2]))
+        print(iterations, ' | Pas Optimal Lagrangien: ', calc.lagrangien(X_k[0], X_k[1], X_k[2]))
         iterations += 1
     return X_k
 
@@ -149,47 +89,30 @@ def newtonMethod(r, h, l):
     print(iterations)
     return X_k
 
-def quasiNewtonMethod(r, h, l):
-        global usedBFGS
+def bfgs(r, h, l):
     # Initial guess
-        X_k = [r, h, l]
-        iterations = 0
-        max_iterations = 1000
-    
-        # Initial Hessian approximation (identity matrix)
-        H_k = [[1,0,0],[0,1,0],[0,0,1]]
-    
-        while iterations < max_iterations:
+    X_k = [r, h, l]
+    iterations = 0
+    max_iterations = 1000
+    tolerance = 1e-5
 
-            # Actual hessian of lagrange for current X_k
-            hess_inv = calc.inverseMatrix(calc.hessianLagrangien(X_k[0], X_k[1], X_k[2]))
-    
+    # Initial Hessian approximation (identity matrix)
+    H_k = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+
+    while iterations < max_iterations:
+            
+            
             grad = calc.gradientLagrangien(X_k[0], X_k[1], X_k[2])
 
             # Compute search direction
             dk = [-sum(H_k[i][j] * grad[j] for j in range(3)) for i in range(3)]
 
-            # Compute newton direction
-            newton_dk = [
-                hess_inv[0][0] * grad[0] + hess_inv[0][1] * grad[1] + hess_inv[0][2] * grad[2],
-                hess_inv[1][0] * grad[0] + hess_inv[1][1] * grad[1] + hess_inv[1][2] * grad[2],
-                hess_inv[2][0] * grad[0] + hess_inv[2][1] * grad[1] + hess_inv[2][2] * grad[2]
-            ]
-
-            # Check if newton direction is a descent direction
-            condition = calc.scalarProduct(newton_dk, grad) >= 0
-            if condition:
+            if calc.norm(dk) < tolerance:
                 break
-            usedBFGS = True
-            
-            # Find alpha using Wolfe conditions, switch to newton if values are too big
-            try:
-                alpha = wolfeStep(X_k,dk)
-            except:
-                print('No alpha found')
-                break
-
-            # Set Xk+1
+    
+            alpha = calc.wolfeStep(X_k,dk)
+    
+            # Update X_k
             X_k1 = [
                 X_k[0] + alpha*dk[0],
                 X_k[1] + alpha*dk[1],
@@ -212,15 +135,17 @@ def quasiNewtonMethod(r, h, l):
             ]
     
             # Update Hessian approximation using BFGS formula
-            estimation = calc.scalarProduct(s_k, y_k)
-            if estimation != 0:
-                rho_k = 1.0 / calc.scalarProduct(y_k, s_k)
+            correction = calc.scalarProduct(s_k, y_k)
+            if correction != 0:
+                rho_k = 1.0 / correction
             else:
-                rho_k = 0
+                rho_k = 0.0
 
-            V = [[1 - rho_k * s_k[i] * y_k[j] for j in range(3)] for i in range(3)]
-            H_k = [[sum(V[i][k] * H_k[k][j] for k in range(3)) for j in range(3)] for i in range(3)]
-            H_k = [[H_k[i][j] + rho_k * s_k[i] * s_k[j] for j in range(3)] for i in range(3)]
+            outer_sk_yk = [[s_k[i] * y_k[j] for j in range(3)] for i in range(3)]
+            outer_sk_sk = [[s_k[i] * s_k[j] for j in range(3)] for i in range(3)]
+            H_k = [[H_k[i][j] - rho_k * sum(H_k[i][k] * outer_sk_yk[k][j] for k in range(3)) for j in range(3)] for i in range(3)]
+            H_k = [[H_k[i][j] - rho_k * sum(outer_sk_yk[i][k] * H_k[k][j] for k in range(3)) for j in range(3)] for i in range(3)]
+            H_k = [[H_k[i][j] + rho_k * outer_sk_sk[i][j] for j in range(3)] for i in range(3)]
 
     
             # Update X_k and gradient
@@ -229,34 +154,16 @@ def quasiNewtonMethod(r, h, l):
     
             print(iterations, ' | BFGS Lagrangien: ', calc.lagrangien(X_k[0], X_k[1], X_k[2]))
             iterations += 1
-        
-        
-    
-        print(iterations)
-        return newtonMethod(X_k[0], X_k[1], X_k[2])
-    
-
-
+            
+    return X_k
 
 def main ():
-    global usedBFGS
-    #solution = fixedStepGradientMethod(r, h, l)
-    #solution = optimalStepGradientMethod(r, h, l)
-    # solution = newtonMethod(r, h, l)
-    while not usedBFGS:
-        r= random.random()*100
-        h= random.random()*100
-        l= random.random()*100
-        print(r,h,l)
-        hessian = calc.hessianLagrangien(r,h,l)
-        print('Hessian')
-        for i in range(len(hessian)):
-            print(hessian[i])
-        print()
-        print('Inverse Hessian')
-        inverse = calc.inverseMatrix(hessian)
-        for i in range(len(inverse)):
-            print(inverse[i])
-        solution = quasiNewtonMethod(r, h, l)
-        print(solution)
+    r = 1#random.randint(0, 100)
+    h = 1#random.randint(0, 100)
+    l = -20#random.randint(0, 100)
+    # print('Initial values: ', r, h, l)
+    # print('Fixed step gradient method: ', fixedStepGradientMethod(r,h,l))
+    # print('Optimal step gradient method: ', optimalStepGradientMethod(r,h,l))
+    # print('Newton method: ', newtonMethod(r,h,l))
+    print('BFGS method: ', bfgs(r,h,l))
 main()
