@@ -4,16 +4,25 @@ import math
 V0 = 10
 
 # Calcul de la fonction lagrangienne, son gradient et sa hessienne
-def lagrangien(r, h, l):
+def lagrangien(X_k):
+    r = X_k[0]
+    h = X_k[1]
+    l = X_k[2]
     return (math.pi**2) * (r**2) * ((r**2) + (h**2)) + l*((math.pi/3)* (r**2) * h - V0)
 
-def gradientLagrangien(r, h ,l ):
+def gradientLagrangien(X_k):
+    r = X_k[0]
+    h = X_k[1]
+    l = X_k[2]
     x_component = (math.pi**2) * (4* (r**3) + 2* (h**2) *r) + l*((2*math.pi*r*h)/3)
     y_component = 2*h*(math.pi**2)*(r**2) + l*(math.pi/3)*(r**2)
     z_component = (math.pi/3)*(r**2)*h - V0
     return [x_component, y_component, z_component]
 
-def hessianLagrangien(r, h, l):
+def hessianLagrangien(X_k):
+    r = X_k[0]
+    h = X_k[1]
+    l = X_k[2]
     # Second partial derivative with respect to r
     d2f_dr2 = (math.pi**2) * (12 * (r**2) + 2 * (h**2)) + l * (2 * math.pi * h / 3)
     # Second partial derivative with respect to h
@@ -60,11 +69,38 @@ def scalarProduct(v1,v2):
 def norm(x):
     return math.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
 
+def scalarMultiplication(scalar, v):
+    return [scalar * a for a in v]
+
+def scalarMatrixMultiplication(scalar, matrix):
+    return [[scalar * element for element in row] for row in matrix]
+
+def matrixVectorMultiplication(matrix, vector):
+    return [scalarProduct(row, vector) for row in matrix]
+
+def addVectors(v1, v2):
+    return [a + b for a, b in zip(v1, v2)]
+
+def subtractVectors(v1, v2):
+    return [a - b for a, b in zip(v1, v2)]
+
+def outerProduct(v1, v2):
+    return [[a * b for b in v2] for a in v1]
+
+def addMatrices(m1, m2):
+    return [[a + b for a, b in zip(row1, row2)] for row1, row2 in zip(m1, m2)]
+
+def subtractMatrices(m1, m2):
+    return [[a - b for a, b in zip(row1, row2)] for row1, row2 in zip(m1, m2)]
+
+def multiplyMatrices(m1, m2):
+    return [[scalarProduct(row, col) for col in zip(*m2)] for row in m1]
+
 # Algorithme de Wolfe pour trouver un pas optimal pour un certain X_k et dk
 def wolfeStep(X_k, dk):
 
-    lagrange = lagrangien(X_k[0],X_k[1],X_k[2]) # X_k
-    gradient = gradientLagrangien(X_k[0],X_k[1],X_k[2]) # X_k
+    lagrange = lagrangien(X_k) # X_k
+    gradient = gradientLagrangien(X_k) # X_k
 
     psk = scalarProduct(dk,gradient)
 
@@ -87,8 +123,8 @@ def wolfeStep(X_k, dk):
             X_k[2] + a*dk[2],
         ]
 
-        lagrange_X_k1 = lagrangien(X_k1[0],X_k1[1],X_k1[2]) # X_k1
-        gradient_X_k1 = gradientLagrangien(X_k1[0],X_k1[1],X_k1[2]) # X_k1
+        lagrange_X_k1 = lagrangien(X_k1) # X_k1
+        gradient_X_k1 = gradientLagrangien(X_k1) # X_k1
         psk1 = scalarProduct(gradient_X_k1,dk)
 
         iterations += 1
