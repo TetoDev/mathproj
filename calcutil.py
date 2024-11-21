@@ -107,23 +107,23 @@ def multiplyMatrices(m1, m2):
 
 def wolfeStep(X_k, dk):
     alpha = 1.0
-    # Wolfe parameters
+    # Paramètres de Wolfe
     c1 = 1e-4
     c2 = 0.9
-    max_iterations = 100  # Maximum number of iterations to prevent infinite loop
+    max_iterations = 100  # Nombre maximal d'itérations pour trouver le pas optimal
 
     for _ in range(max_iterations):
         g = gradientLagrangien(X_k)
         X_k1 = addVectors(X_k, scalarMultiplication(alpha, dk))
-        # Condition to ensure the step is not too large
+        # Condition pour verifier si le pas n'est pas trop grand
         if lagrangien(X_k1) > lagrangien(X_k) + c1 * alpha * scalarProduct(g, dk):
             alpha *= 0.5
         else:
             g_k1 = gradientLagrangien(X_k1)
-            # Condition to ensure the step is not too small
+            # Condition pour vérifier si le pas n'est pas trop petit
             if scalarProduct(g_k1, dk) >= c2 * scalarProduct(g, dk):
                 return alpha
             alpha *= 2.0
 
-    # If the loop exits without finding a suitable alpha, return the last alpha
-    return alpha
+    # Renvoyer 0,00001 si le pas optimal n'est pas trouvé
+    return 0.00001

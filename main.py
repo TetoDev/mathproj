@@ -82,34 +82,36 @@ def newtonMethod(r, h, l):
 
 def bfgs(r, h, l):
 
-    # Initialisation of initial guess
+    # Initialisation des valeurs de r, h, l
     X_k = [r,h,l] 
-    tolerance = 5
+    tolerance = 1
 
-    # Initialisation of Hessian approximation, Identity matrix
+    # Initialisation de la matrice H, matrice Identité
     H = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
     
     for iterations in range(1, 100):
         grad = calc.gradientLagrangien(X_k)
         
-        # Check convergence
+        # Check if the gradient is less than the tolerance
         grad_norm = calc.scalarProduct(grad, grad) ** 0.5
         if grad_norm < tolerance:
             return X_k
         
-        # Compute search direction
+        # Calcul de la direction de descente
         dk = calc.scalarMultiplication(-1, calc.matrixVectorMultiplication(H, grad))
         
-        # Line search to find optimal step size
+        # Wolfe step pour trouver le pas optimal
         alpha = calc.wolfeStep(X_k, dk)
         
-        # Update x
+        # Calcul de X_k1
         X_k1 = calc.addVectors(X_k, calc.scalarMultiplication(alpha, dk))
 
-        if abs(calc.lagrangien(X_k1) - calc.lagrangien(X_k)) < 0.00001 and iterations > 10:
+
+        # Si après 17 itérations, la différence entre les valeurs de la fonction lagrangienne est inférieure à 0.001, on arrête
+        if abs(calc.lagrangien(X_k1) - calc.lagrangien(X_k)) < 0.001 and iterations > 17:
             break
         
-        s = calc.subtractVectors(X_k1, X_k) # Calculation of s by the difference of X_k1 and X_k
+        s = calc.subtractVectors(X_k1, X_k) # Calcul de la différence entre X_k1 and X_k
         X_k = X_k1
 
         
@@ -117,7 +119,7 @@ def bfgs(r, h, l):
         grad_k1 = calc.gradientLagrangien(X_k1)
         y = calc.subtractVectors(grad_k1, grad)
         
-        # Update Hessian approximation (BFGS formula)
+        # Calcul de formule de BFGS avec produit extérieur pour simplifier l'écriture sur ordinateur
         if calc.scalarProduct(y, s) != 0:
             rho = 1 / calc.scalarProduct(y, s)
             sy_outer = calc.outerProduct(s, y)
@@ -129,23 +131,24 @@ def bfgs(r, h, l):
         
         print(iterations, ' | BFGS Lagrangien: ', calc.lagrangien(X_k))
     
-    # If max iterations reached, return current estimate
+    # Return the final result
     return X_k, iterations
 
 
 
 def main ():
-    r = random.randint(0, 100)
-    h = random.randint(0, 100)
-    l = random.randint(0, 100)
+    r = 1 #random.randint(0, 100)
+    h = 1 #random.randint(0, 100)
+    l = -2 #random.randint(0, 100)
 
     fixedStepResults, i1 = fixedStepGradientMethod(r,h,l)
     optimalStepResults, i2 = optimalStepGradientMethod(r,h,l)
     newtonResults, i3 = newtonMethod(r,h,l)
     bfgsResults, i4 = bfgs(r,h,l)
 
-    print('Fixed step gradient method: ', fixedStepResults, ' | Iterations: ', i1)
-    print('Optimal step gradient method: ', optimalStepResults, ' | Iterations: ', i2)
-    print('Newton method: ', newtonResults, ' | Iterations: ', i3)
-    print('BFGS method: ', bfgsResults, ' | Iterations: ', i4)
+    print('Valeurs initiales: ', r, h, l)
+    print('Méthode Gradient à pas fixe: ', fixedStepResults, ' | Iterations: ', i1)
+    print('Méthode Gradient à pas Optimal: ', optimalStepResults, ' | Iterations: ', i2)
+    print('Méthode Newton: ', newtonResults, ' | Iterations: ', i3)
+    print('Méthode BFGS: ', bfgsResults, ' | Iterations: ', i4)
 main()
