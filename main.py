@@ -9,7 +9,7 @@ def fixedStepGradientMethod (r,h,l):
     # Initialisation arbitraire du vecteur direction
     dk = [10,10,10]
     iterations = 1
-    while (calc.norm(dk) > 0.5 and iterations < 10000):
+    while (calc.norm(dk) > 0.5 and iterations < 1000):
 
         # Calcul du gradient de la fonction lagrangienne
         dk = calc.gradientLagrangien(X_k)
@@ -34,7 +34,7 @@ def optimalStepGradientMethod(r,h,l):
     dk = [10,10,10]
 
     iterations = 1
-    while (calc.norm(dk) > 0.8 and iterations < 100000):
+    while (calc.norm(dk) > 0.8 and iterations < 1000):
 
         dk = calc.gradientLagrangien(X_k)
         
@@ -84,12 +84,12 @@ def bfgs(r, h, l):
 
     # Initialisation of initial guess
     X_k = [r,h,l] 
-    tolerance = 1e-5
+    tolerance = 5
 
     # Initialisation of Hessian approximation, Identity matrix
     H = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
     
-    for iterations in range(1, 10000):
+    for iterations in range(1, 100):
         grad = calc.gradientLagrangien(X_k)
         
         # Check convergence
@@ -105,8 +105,13 @@ def bfgs(r, h, l):
         
         # Update x
         X_k1 = calc.addVectors(X_k, calc.scalarMultiplication(alpha, dk))
+
+        if abs(calc.lagrangien(X_k1) - calc.lagrangien(X_k)) < 0.00001 and iterations > 10:
+            break
+        
         s = calc.subtractVectors(X_k1, X_k) # Calculation of s by the difference of X_k1 and X_k
         X_k = X_k1
+
         
         # Update gradient and compute y
         grad_k1 = calc.gradientLagrangien(X_k1)
@@ -114,16 +119,20 @@ def bfgs(r, h, l):
         
         # Update Hessian approximation (BFGS formula)
         if calc.scalarProduct(y, s) != 0:
-            rho = 1.0 / calc.scalarProduct(y, s)
+            rho = 1 / calc.scalarProduct(y, s)
             sy_outer = calc.outerProduct(s, y)
             ss_outer = calc.outerProduct(s, s)
             H = calc.subtractMatrices(calc.subtractMatrices(H, calc.scalarMatrixMultiplication(rho, calc.multiplyMatrices(sy_outer, H))), calc.scalarMatrixMultiplication(rho, calc.multiplyMatrices(H, sy_outer)))
             H = calc.addMatrices(H, calc.scalarMatrixMultiplication(rho, ss_outer))
+        else:
+            H = [[1, 0, 0], [0, 1, 0], [0, 0, 1]] # Reinitialiser la matrice H si le produit scalaire est 0
         
         print(iterations, ' | BFGS Lagrangien: ', calc.lagrangien(X_k))
     
     # If max iterations reached, return current estimate
     return X_k, iterations
+
+
 
 def main ():
     r = random.randint(0, 100)
