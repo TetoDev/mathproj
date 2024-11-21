@@ -1,8 +1,8 @@
-import random
 import calcutil as calc
 
 # Méthode de gradient à pas fixe
 def fixedStepGradientMethod (r,h,l):
+    print('Méthode Gradient à pas fixe')
 
     X_k = [r,h,l]
 
@@ -26,6 +26,7 @@ def fixedStepGradientMethod (r,h,l):
         
 # Méthode de gradient à pas optimal, utilisant le Wolfe step
 def optimalStepGradientMethod(r,h,l):
+    print('\nMéthode Gradient à pas optimal')
 
     alpha = 0
     X_k = [r,h,l]
@@ -43,7 +44,6 @@ def optimalStepGradientMethod(r,h,l):
 
         # Calcul du pas optimal avec la méthode de Wolfe et dk negatif
         alpha = calc.wolfeStep(X_k,dk)
-        print('OptimalStep a: ', alpha)
 
         # Mise à jour de dk avec le pas optimal
         dk = calc.scalarMultiplication(alpha, dk)
@@ -57,6 +57,8 @@ def optimalStepGradientMethod(r,h,l):
 
 # Méthode de Newton
 def newtonMethod(r, h, l):
+    print('\nMéthode Newton')
+
     X_k = [r, h, l]
 
     # Initialisation arbitraire du vecteur direction
@@ -81,21 +83,22 @@ def newtonMethod(r, h, l):
     return X_k, iterations
 
 def bfgs(r, h, l):
+    print('\nMéthode BFGS')
 
     # Initialisation des valeurs de r, h, l
     X_k = [r,h,l] 
-    tolerance = 1
+    tolerance = 1e-5
 
     # Initialisation de la matrice H, matrice Identité
     H = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-    
+    iterations = 0
     for iterations in range(1, 100):
         grad = calc.gradientLagrangien(X_k)
         
-        # Check if the gradient is less than the tolerance
+        # Retourner X_k si la norme du gradient est inférieure à la tolérance
         grad_norm = calc.scalarProduct(grad, grad) ** 0.5
         if grad_norm < tolerance:
-            return X_k
+            return X_k, iterations
         
         # Calcul de la direction de descente
         dk = calc.scalarMultiplication(-1, calc.matrixVectorMultiplication(H, grad))
@@ -107,15 +110,15 @@ def bfgs(r, h, l):
         X_k1 = calc.addVectors(X_k, calc.scalarMultiplication(alpha, dk))
 
 
-        # Si après 17 itérations, la différence entre les valeurs de la fonction lagrangienne est inférieure à 0.001, on arrête
-        if abs(calc.lagrangien(X_k1) - calc.lagrangien(X_k)) < 0.001 and iterations > 17:
+        # Si après plusieures itérations, la différence entre les valeurs de la fonction lagrangienne est inférieure à 0.001, on arrête
+        if abs(calc.lagrangien(X_k1) - calc.lagrangien(X_k)) < 0.001 and iterations > 10:
             break
         
         s = calc.subtractVectors(X_k1, X_k) # Calcul de la différence entre X_k1 and X_k
         X_k = X_k1
 
         
-        # Update gradient and compute y
+        # Calculer nouveau gradient et y
         grad_k1 = calc.gradientLagrangien(X_k1)
         y = calc.subtractVectors(grad_k1, grad)
         
@@ -131,22 +134,23 @@ def bfgs(r, h, l):
         
         print(iterations, ' | BFGS Lagrangien: ', calc.lagrangien(X_k))
     
-    # Return the final result
+    
+    # Renvoyer les valeurs de X_k et le nombre d'itérations
     return X_k, iterations
 
 
 
 def main ():
-    r = 1 #random.randint(0, 100)
-    h = 1 #random.randint(0, 100)
-    l = -2 #random.randint(0, 100)
+    r = 1
+    h = 1
+    l = 1
 
     fixedStepResults, i1 = fixedStepGradientMethod(r,h,l)
     optimalStepResults, i2 = optimalStepGradientMethod(r,h,l)
     newtonResults, i3 = newtonMethod(r,h,l)
     bfgsResults, i4 = bfgs(r,h,l)
 
-    print('Valeurs initiales: ', r, h, l)
+    print('\nValeurs initiales: ', r, h, l)
     print('Méthode Gradient à pas fixe: ', fixedStepResults, ' | Iterations: ', i1)
     print('Méthode Gradient à pas Optimal: ', optimalStepResults, ' | Iterations: ', i2)
     print('Méthode Newton: ', newtonResults, ' | Iterations: ', i3)

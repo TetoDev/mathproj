@@ -1,7 +1,7 @@
 import math
 
-# Volume contrainte minimale
-V0 = 10
+# Volume contrainte minimale, 1e-3 m^3 pour 1 litre de volume
+V0 = 1e-3
 
 # Calcul de la fonction lagrangienne, son gradient et sa hessienne
 def lagrangien(X_k):
