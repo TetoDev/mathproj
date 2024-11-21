@@ -5,19 +5,25 @@ V0 = 10
 
 # Calcul de la fonction lagrangienne, son gradient et sa hessienne
 def lagrangien(X_k):
-    r = X_k[0]
-    h = X_k[1]
-    l = X_k[2]
-    return (math.pi**2) * (r**2) * ((r**2) + (h**2)) + l*((math.pi/3)* (r**2) * h - V0)
+    try:
+        r = X_k[0]
+        h = X_k[1]
+        l = X_k[2]
+        return (math.pi**2) * (r**2) * ((r**2) + (h**2)) + l*((math.pi/3)* (r**2) * h - V0)
+    except:
+        return 0
 
 def gradientLagrangien(X_k):
-    r = X_k[0]
-    h = X_k[1]
-    l = X_k[2]
-    x_component = (math.pi**2) * (4* (r**3) + 2* (h**2) *r) + l*((2*math.pi*r*h)/3)
-    y_component = 2*h*(math.pi**2)*(r**2) + l*(math.pi/3)*(r**2)
-    z_component = (math.pi/3)*(r**2)*h - V0
-    return [x_component, y_component, z_component]
+    try:
+        r = X_k[0]
+        h = X_k[1]
+        l = X_k[2]
+        x_component = (math.pi**2) * (4* (r**3) + 2* (h**2) *r) + l*((2*math.pi*r*h)/3)
+        y_component = 2*h*(math.pi**2)*(r**2) + l*(math.pi/3)*(r**2)
+        z_component = (math.pi/3)*(r**2)*h - V0
+        return [x_component, y_component, z_component]
+    except:
+        return [0, 0, 0]
 
 def hessianLagrangien(X_k):
     r = X_k[0]
@@ -67,7 +73,10 @@ def scalarProduct(v1,v2):
 
 # Calcul de la norme d'un vecteur
 def norm(x):
-    return math.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
+    try:
+        return math.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
+    except:
+        return 0
 
 def scalarMultiplication(scalar, v):
     return [scalar * a for a in v]

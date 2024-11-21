@@ -13,7 +13,7 @@ def fixedStepGradientMethod (r,h,l):
 
         # Calcul du gradient de la fonction lagrangienne
         dk = calc.gradientLagrangien(X_k)
-
+    
         # Mise à jour de dk avec le pas fixe
         dk = calc.scalarMultiplication(0.0001, dk)
         
@@ -22,7 +22,7 @@ def fixedStepGradientMethod (r,h,l):
         
         print(iterations, ' | Pas fixe Lagrangien: ', calc.lagrangien(X_k))
         iterations += 1
-    return X_k
+    return X_k, iterations
         
 # Méthode de gradient à pas optimal, utilisant le Wolfe step
 def optimalStepGradientMethod(r,h,l):
@@ -53,7 +53,7 @@ def optimalStepGradientMethod(r,h,l):
 
         print(iterations, ' | Pas Optimal Lagrangien: ', calc.lagrangien(X_k))
         iterations += 1
-    return X_k
+    return X_k, iterations
 
 # Méthode de Newton
 def newtonMethod(r, h, l):
@@ -78,7 +78,7 @@ def newtonMethod(r, h, l):
         print(iterations, ' | Newton Lagrangien: ', calc.lagrangien(X_k))
         iterations += 1
     print(iterations)
-    return X_k
+    return X_k, iterations
 
 def bfgs(r, h, l):
 
@@ -113,14 +113,12 @@ def bfgs(r, h, l):
         y = calc.subtractVectors(grad_k1, grad)
         
         # Update Hessian approximation (BFGS formula)
-        if calc.scalarProduct(y, s) > 0:
+        if calc.scalarProduct(y, s) != 0:
             rho = 1.0 / calc.scalarProduct(y, s)
             sy_outer = calc.outerProduct(s, y)
             ss_outer = calc.outerProduct(s, s)
             H = calc.subtractMatrices(calc.subtractMatrices(H, calc.scalarMatrixMultiplication(rho, calc.multiplyMatrices(sy_outer, H))), calc.scalarMatrixMultiplication(rho, calc.multiplyMatrices(H, sy_outer)))
             H = calc.addMatrices(H, calc.scalarMatrixMultiplication(rho, ss_outer))
-        else:
-            H = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
         
         print(iterations, ' | BFGS Lagrangien: ', calc.lagrangien(X_k))
     
@@ -128,12 +126,17 @@ def bfgs(r, h, l):
     return X_k, iterations
 
 def main ():
-    r = 1#random.randint(0, 100)
-    h = 1#random.randint(0, 100)
-    l = 20#random.randint(0, 100)
-    # print('Initial values: ', r, h, l)
-    # print('Fixed step gradient method: ', fixedStepGradientMethod(r,h,l))
-    # print('Optimal step gradient method: ', optimalStepGradientMethod(r,h,l))
-    # print('Newton method: ', newtonMethod(r,h,l))
-    print('BFGS method: ', bfgs(r,h,l))
+    r = random.randint(0, 100)
+    h = random.randint(0, 100)
+    l = random.randint(0, 100)
+
+    fixedStepResults, i1 = fixedStepGradientMethod(r,h,l)
+    optimalStepResults, i2 = optimalStepGradientMethod(r,h,l)
+    newtonResults, i3 = newtonMethod(r,h,l)
+    bfgsResults, i4 = bfgs(r,h,l)
+
+    print('Fixed step gradient method: ', fixedStepResults, ' | Iterations: ', i1)
+    print('Optimal step gradient method: ', optimalStepResults, ' | Iterations: ', i2)
+    print('Newton method: ', newtonResults, ' | Iterations: ', i3)
+    print('BFGS method: ', bfgsResults, ' | Iterations: ', i4)
 main()
