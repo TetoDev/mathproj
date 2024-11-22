@@ -16,7 +16,7 @@ On a codé les méthodes suivantes dans main.py:
 
 Dans calcutil.py, il y a la méthode Wolfe, plusieures fonctions d'opération de vecteurs et matrices et les calculs pour le lagrangien, son gradient et sa matrice hessienne.
 
-En exécutant main.py, le programme va selectionner des valeurs de r, h et l (lambda) aléatoirement pour après converger vers le minimum on utilisant les différentes méthodes, pour après afficher les résultats de chaque méthode.
+En exécutant main.py, le programme va selectionner des valeurs de r, h et l (lambda) aléatoirement pour après converger vers le minimum en utilisant les différentes méthodes, pour après afficher les résultats obtenus avec chaque méthode.
 
 
 Dépendances:
